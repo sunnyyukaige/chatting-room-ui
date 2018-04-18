@@ -1,9 +1,13 @@
 import * as React from "react";
 
+import { Me } from "modules/authentication";
+import { messagesLoader } from "modules/chat";
+
 import { Field, SendButton } from "./";
 
 export interface Props {
   className?: string;
+  me: Me;
 }
 
 export interface State {
@@ -16,7 +20,7 @@ class Component extends React.PureComponent<Props, State> {
   public render() {
     return (
       <div className={this.props.className}>
-        <Field onTextChange={(event) => this._onTextChange(event)} />
+        <Field onTextChange={(event) => this._onTextChange(event)} onSendMessage={() => this._sendMessage()} />
         <SendButton onClick={this._onSendClick} />
       </div>
     );
@@ -27,20 +31,18 @@ class Component extends React.PureComponent<Props, State> {
   }
 
   private _sendMessage() {
+    messagesLoader.sendMessages({
+      message: this.state.message,
+      password: this.props.me.password,
+      username: this.props.me.username,
+    });
     this.setState({ message: "" });
   }
 
-  private _onTextChange(event: React.KeyboardEvent<HTMLDivElement>) {
-    const div = event.target as HTMLDivElement;
-    const message = div.innerText;
-    if (!(event.keyCode === 13)) {
-      return this.setState({
-        message,
-      });
-    }
-    div.innerText = "";
-    this._sendMessage();
-    event.preventDefault();
+  private _onTextChange(message) {
+    return this.setState({
+      message,
+    });
   }
 }
 
